@@ -11,9 +11,10 @@ class Field:
     def __get__(self, instance, owner=None):
         if instance is None:
             return self
+        return instance.__dict__[self._name]
 
     def validate(self, instance, value):
-        raise NotImplementedError
+        pass
 
     def __set__(self, instance, value):
         self.validate(instance, value)
@@ -22,6 +23,7 @@ class Field:
 
 class Typed(Field):
     def validate(self, instance, value):
+        super().validate(instance, value)
         if not isinstance(value, self.expected_type):
             raise TypeError(f"{value}: expected {self.expected_type!r}")
 
@@ -40,16 +42,18 @@ class String(Typed):
 
 class Unsigned(Field):
     def validate(self, instance, value):
+        super().validate(instance, value)
         if value < 0:
             raise TypeError(f"{value}: Must be > 0")
 
 
 class MaxSized(Field):
     def validate(self, instance, value):
-        if not hasattr(self, "_size"):
-            raise AttributeError("Missing '_size'")
-        if len(value) > self._size:
-            raise ValueError(f"{value}: must not exceed {self._size} in lenght")
+        super().validate(instance, value)
+        if not hasattr(self, "size"):
+            raise AttributeError("Missing 'size'")
+        if len(value) > self.size:
+            raise ValueError(f"{value}: must not exceed {self.size} in lenght")
 
 
 class UnsignedInteger(Integer, Unsigned):
@@ -65,7 +69,7 @@ class SizedString(String, MaxSized):
 
 
 class Stock:
-    name = SizedString(8)
+    name = SizedString(size=8)
     shares = UnsignedInteger()
     price = UnsignedFloat()
 
@@ -73,6 +77,10 @@ class Stock:
         self.name = name
         self.shares = shares
         self.price = price
+
+    def __repr__(self):
+        args = ", ".join(f"{a!r}" for _, a in self.__dict__.items())
+        return f"{type(self).__name__}({args})"
 
 
 if __name__ == "__main__":
