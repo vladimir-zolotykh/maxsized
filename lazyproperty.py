@@ -40,7 +40,6 @@ def perf_count(func):
         nonlocal depth
         save = depth
         depth += 1
-        # print(f"{save = }")
         if save == 0:
             t0 = time.perf_counter()
         res = func(*args, **kwargs)
@@ -60,7 +59,5 @@ class Fibonacci:
 
 
 if __name__ == "__main__":
-    t0 = time.perf_counter()
-    res = Fibonacci().fib(80)
-    # print("Elapsed: {}".format(time.perf_counter() - t0))
-    print(f"{res = }")
+    res = Fibonacci().fib(n := 80)
+    print(f"fib({n}) = {res}")
