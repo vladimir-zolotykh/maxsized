@@ -3,6 +3,7 @@
 # PYTHON_ARGCOMPLETE_OK
 from typing import Callable
 import types
+from functools import wraps
 import time
 
 
@@ -24,14 +25,26 @@ class lazyproperty:
         return self.func(*args)
 
 
+def perf_count(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        t0 = time.perf_counter()
+        res = func(*args, **kwargs)
+        print("elapsed {}".format(time.perf_counter() - t0))
+        return res
+
+    return wrapper
+
+
 class Fibonacci:
+    # @perf_count
     @lazyproperty
     def fib(self, n):
         return self.fib(n - 2) + self.fib(n - 1) if n >= 2 else n
 
 
 if __name__ == "__main__":
-    print(time.perf_counter())
+    t0 = time.perf_counter()
     res = Fibonacci().fib(33)
-    print(time.perf_counter())
     print(f"{res = }")
+    print("Elapsed: {}".format(time.perf_counter() - t0))
