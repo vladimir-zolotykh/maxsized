@@ -38,14 +38,16 @@ def perf_count(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         nonlocal depth
-        save = depth
-        depth += 1
-        if save == 0:
+        outermost = depth == 0
+        if outermost:
             t0 = time.perf_counter()
-        res = func(*args, **kwargs)
-        if save == 0:
+        depth += 1
+        try:
+            res = func(*args, **kwargs)
+        finally:
+            depth -= 1
+        if outermost:
             print("Elapsed {}".format(time.perf_counter() - t0))
-        depth = save
         return res
 
     return wrapper
