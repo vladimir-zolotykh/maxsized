@@ -33,6 +33,7 @@ class lazyproperty:
 
 
 def perf_count(func):
+
     @wraps(func)
     def wrapper(*args, **kwargs):
         t0 = time.perf_counter()
@@ -44,14 +45,14 @@ def perf_count(func):
 
 
 class Fibonacci:
-    # @perf_count
     @lazyproperty
+    @perf_count
     def fib(self, n):
         return self.fib(n - 2) + self.fib(n - 1) if n >= 2 else n
 
 
 if __name__ == "__main__":
     t0 = time.perf_counter()
-    res = Fibonacci().fib(33)
+    res = Fibonacci().fib(5)
     print(f"{res = }")
     print("Elapsed: {}".format(time.perf_counter() - t0))
