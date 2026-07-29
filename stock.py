@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # PYTHON_ARGCOMPLETE_OK
+import pytest
+
+
 class Field:
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
@@ -23,9 +26,9 @@ class Field:
 
 class Typed(Field):
     def validate(self, instance, value):
-        super().validate(instance, value)
         if not isinstance(value, self.expected_type):
             raise TypeError(f"{value}: expected {self.expected_type!r}")
+        super().validate(instance, value)
 
 
 class Integer(Typed):
@@ -42,18 +45,18 @@ class String(Typed):
 
 class Unsigned(Field):
     def validate(self, instance, value):
-        super().validate(instance, value)
         if value < 0:
             raise TypeError(f"{value}: Must be > 0")
+        super().validate(instance, value)
 
 
 class MaxSized(Field):
     def validate(self, instance, value):
-        super().validate(instance, value)
         if not hasattr(self, "size"):
             raise AttributeError("Missing 'size'")
         if len(value) > self.size:
             raise ValueError(f"{value}: must not exceed {self.size} in lenght")
+        super().validate(instance, value)
 
 
 class UnsignedInteger(Integer, Unsigned):
@@ -81,6 +84,28 @@ class Stock:
     def __repr__(self):
         args = ", ".join(f"{a!r}" for _, a in self.__dict__.items())
         return f"{type(self).__name__}({args})"
+
+
+@pytest.fixture
+def stock():
+    return Stock("ACME", 50, 91.1)
+
+
+def test_name(stock):
+    assert stock.name == "ACME"
+    with pytest.raises(ValueError, match="must not exceed 8 in lenght"):
+        stock.name = "ABRACADABRA"
+
+
+def test_shares(stock):
+    assert stock.shares == 50
+    with pytest.raises(TypeError):
+        stock.shares = -75
+
+
+def test_price(stock):
+    with pytest.raises(TypeError):
+        stock.price = "a lot"
 
 
 if __name__ == "__main__":
