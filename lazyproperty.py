@@ -33,12 +33,20 @@ class lazyproperty:
 
 
 def perf_count(func):
+    depth = 0
 
     @wraps(func)
     def wrapper(*args, **kwargs):
-        t0 = time.perf_counter()
+        nonlocal depth
+        save = depth
+        depth += 1
+        # print(f"{save = }")
+        if save == 0:
+            t0 = time.perf_counter()
         res = func(*args, **kwargs)
-        print("elapsed {}".format(time.perf_counter() - t0))
+        if save == 0:
+            print("Elapsed {}".format(time.perf_counter() - t0))
+        depth = save
         return res
 
     return wrapper
@@ -53,6 +61,6 @@ class Fibonacci:
 
 if __name__ == "__main__":
     t0 = time.perf_counter()
-    res = Fibonacci().fib(5)
+    res = Fibonacci().fib(80)
+    # print("Elapsed: {}".format(time.perf_counter() - t0))
     print(f"{res = }")
-    print("Elapsed: {}".format(time.perf_counter() - t0))
