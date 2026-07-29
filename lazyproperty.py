@@ -22,7 +22,14 @@ class lazyproperty:
 
     def __call__(self, *args, **kwargs):
         instance, n = args
-        return self.func(*args)
+        cache = instance.__dict__[self.cache_name]
+        if n in cache:
+            return cache[n]
+        else:
+            val = self.func(*args)
+            cache[n] = val
+            return val
+        # return self.func(*args)
 
 
 def perf_count(func):
