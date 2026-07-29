@@ -3,6 +3,7 @@
 # PYTHON_ARGCOMPLETE_OK
 from typing import Callable
 import types
+import time
 
 
 class lazyproperty:
@@ -30,4 +31,7 @@ class Fibonacci:
 
 
 if __name__ == "__main__":
-    print(Fibonacci().fib(5))
+    print(time.perf_counter())
+    res = Fibonacci().fib(33)
+    print(time.perf_counter())
+    print(f"{res = }")
